@@ -22,7 +22,7 @@ pipeline {
                 git branch: 'main',
                     credentialsId: "DR_GIT_KEY",            
                     url: 'https://github.com/DR-Ravikanth/test.git'
-                dir("test_app") {
+                dir("test") {
                     // git branch: "${env.GITBRANCH}",
                     git branch: "develop",
                     credentialsId: "DR_GIT_KEY",
