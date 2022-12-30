@@ -1,0 +1,2 @@
+[jenkinsServer]
+34.211.178.191 ansible_user=ubuntu

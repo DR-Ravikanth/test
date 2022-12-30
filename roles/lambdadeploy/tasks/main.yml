@@ -1,0 +1,4 @@
+- name: Deploy the application code
+  shell: "chdir={{ wpDir }} sls deploy --force"
+  tags:
+    - lambda_deploy

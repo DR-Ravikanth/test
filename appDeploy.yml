@@ -1,0 +1,15 @@
+---
+- name: Code pull and build the application on jenkins
+  hosts: JenkinsServers
+  become: yes
+  gather_facts: false
+  vars_files:
+    - "./config/{{ apps_env }}/extra_vars.yml"
+  
+  roles:   
+   - role: lambdadeploy
+     tags:
+      - lambda_deploy
+   
+   
+    

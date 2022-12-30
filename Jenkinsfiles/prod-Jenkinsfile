@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+    environment
+	{
+		apps_infra_env = "soft_prod"
+	}
+    stages {
+        stage("SCM Checkout") {
+            steps {
+                git branch: 'develop',
+                    credentialsId: "RajaGitAccess",            
+                    url: 'https://github.com/devrabbititsol/soft_app_iac.git'
+                dir("softAppCode") {
+                    git branch: 'master',
+                    credentialsId: "RajaBitBucketAccess",
+                    url: 'https://rajasekhar_devrabbit@bitbucket.org/dritsdevops/nodejsapp.git'
+                }
+            }  
+        }
+        // stage("SonarQube analysis") 
+		// {
+		// 	environment 
+		// 	{
+		// 		scannerHome = tool 'SQS_4.7.0'
+		// 	}
+		// 	steps 
+		// 	{
+		// 		withSonarQubeEnv('sq_8.9.9') 
+		// 		{
+		// 			sh ''' 
+		// 			${scannerHome}/bin/sonar-scanner \
+        //         	-D sonar.projectKey=dev_sqe_module
+		// 			'''
+		// 		}
+		// 	}
+		// }
+    	// stage("Quality Gate Status Check")
+		// {
+		// 	steps
+		// 	{
+		// 		timeout(time: 1, unit: 'HOURS')
+		// 		{
+		// 			script
+		// 			{
+		// 				def qg = waitForQualityGate()
+		// 				if (qg.status != 'OK')
+		// 				{
+		// 				error "Pipeline aborted due to quality gate failure: ${qg.status}"
+		// 				}
+		// 			}									
+		// 		}
+		// 	}
+    	// }  
+
+        stage('Build') {
+            steps {
+                sh " cd softAppCode && npm install"
+                // sh "npm run build"        
+            }
+        }        
+
+        stage('Deploy') {
+            steps {
+                ansiblePlaybook become: true, 
+                    credentialsId: 'JENKINS_APP_SERVER',
+                    disableHostKeyChecking: true,
+                    extras: "-e apps_env=${env.apps_infra_env} ", 
+                    installation: 'ansible', 
+                    inventory: 'inventories/dev.inv', 
+                    limit: 'jenkinsServer', 
+                    playbook: 'appDeploy.yml',
+                    tags: 'archive_appbuilds, s3_deploy, lambda_deploy'                
+            }
+        }        
+    }
+}

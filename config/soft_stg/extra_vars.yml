@@ -1,0 +1,6 @@
+date: "{{ lookup('pipe', 'date +%m%d%Y_%H%M') }}"
+app_src_dir: "/var/lib/jenkins/workspace/DR_LambdaProject/APP_DEPLOYMENT/softAppCode/"
+app_zip_dir: "/opt/appbuilds/nodeapps/stg"
+app_zip_file_name: "{{ date }}"
+s3_bucket_name: "soft-s3-stg"
+lambda_fn_name: "soft_lambda-stg"

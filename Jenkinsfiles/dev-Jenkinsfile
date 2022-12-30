@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+    environment
+	{
+		apps_infra_env = "soft_dev"
+        
+	}
+    stages {
+        // stage ("Prompt for input") {
+        //     steps {
+        //         script {
+        //         env.GITBRANCH = input message: 'Enter the app branch name',
+        //                             parameters: [string(defaultValue: '',
+        //                                         description: '',
+        //                                         name: 'GitBranch')]            
+        //         }
+        //         echo "GitBranch: ${env.GITBRANCH}"                
+        //     }
+        // }
+        stage("SCM Checkout") {
+            steps {
+                git branch: 'soft_sls_poc',
+                    credentialsId: "DR_GIT_KEY",            
+                    url: 'https://github.com/devrabbititsol/soft_app_iac.git'
+                dir("softAppCode") {
+                    // git branch: "${env.GITBRANCH}",
+                    git branch: "develop",
+                    credentialsId: "DR_GIT_KEY",
+                    url: 'https://github.com/devrabbititsol/soft_apis.git'
+                }
+            }  
+        }
+
+        stage("SonarQube analysis") 
+		{
+			environment 
+			{
+				scannerHome = tool 'SQS_4.7.0'
+			}
+			steps 
+			{
+				withSonarQubeEnv('sq_8.9.9')
+				{
+					sh ''' 
+					cd softAppCode && ${scannerHome}/bin/sonar-scanner \
+                    -D sonar.projectKey=dev_soft_api                                                        
+					'''
+				}
+			}
+		}
+
+    	stage("Quality Gate Status Check")
+		{
+			steps
+			{
+				timeout(time: 1, unit: 'HOURS')
+				{
+					script
+					{
+						def qg = waitForQualityGate()
+						if (qg.status != 'OK')
+						{
+						error "Pipeline aborted due to quality gate failure: ${qg.status}"
+						}
+					}
+									
+				}
+
+			}
+
+    	} 
+        // stage('Build') {
+        //     steps {
+        //         sh "cd softAppCode && npm install"                    
+        //     }
+        // }  
+
+//         stage('Deploy') {
+//             steps {
+//                 // withAWS(credentials: 'SOFT_AWS_CREDS')                
+//                 // { }
+//                     ansiblePlaybook become: true, 
+//                     credentialsId: 'SOFT_AWS_EC2',
+//                     disableHostKeyChecking: true,
+//                     extras: "-e apps_env=${env.apps_infra_env}",  
+//                     installation: 'ansible', 
+//                     inventory: 'inventories/dev.inv', 
+//                     limit: 'JenkinsServers', 
+//                     playbook: 'appDeploy.yml',
+//                     tags: 'lambda_deploy' 
+//             }
+//         }        
+//     }
+// }
