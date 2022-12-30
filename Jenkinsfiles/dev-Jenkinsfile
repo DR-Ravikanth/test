@@ -42,7 +42,7 @@ pipeline {
 				withSonarQubeEnv('sq_8.9.9')
 				{
 					sh ''' 
-					cd softAppCode && ${scannerHome}/bin/sonar-scanner \
+					cd test && ${scannerHome}/bin/sonar-scanner \
                     -D sonar.projectKey=dev_test_app                                                        
 					'''
 				}
