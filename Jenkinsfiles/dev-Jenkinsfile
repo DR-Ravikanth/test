@@ -19,9 +19,9 @@ pipeline {
         // }
         stage("SCM Checkout") {
             steps {
-                git branch: 'soft_sls_poc',
+                git branch: 'main',
                     credentialsId: "DR_GIT_KEY",            
-                    url: 'https://github.com/devrabbititsol/soft_app_iac.git'
+                    url: 'https://github.com/DR-Ravikanth/test.git'
                 dir("softAppCode") {
                     // git branch: "${env.GITBRANCH}",
                     git branch: "develop",
@@ -43,7 +43,7 @@ pipeline {
 				{
 					sh ''' 
 					cd softAppCode && ${scannerHome}/bin/sonar-scanner \
-                    -D sonar.projectKey=dev_soft_api                                                        
+                    -D sonar.projectKey=dev_test_app                                                        
 					'''
 				}
 			}
